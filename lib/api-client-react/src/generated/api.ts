@@ -80,6 +80,7 @@ import type {
   QuizAttemptInput,
   QuizGradeInput,
   QuizInput,
+  QuizSession,
   RemoveTeacherResult,
   SetCoordinatorCoursesInput,
   SetCoordinatorCoursesResult,
@@ -2878,6 +2879,149 @@ export const useCreateQuizAttempt = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getCreateQuizAttemptMutationOptions(options));
+    }
+
+export const getStartQuizSessionUrl = (quizId: number,) => {
+
+
+
+
+  return `/api/quizzes/${quizId}/session`
+}
+
+/**
+ * @summary Start (or resume) the student's quiz session. Starts the server-side timer on first call; later calls return the same deadline and the auto-saved answers.
+ */
+export const startQuizSession = async (quizId: number, options?: RequestInit): Promise<QuizSession> => {
+
+  return customFetch<QuizSession>(getStartQuizSessionUrl(quizId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getStartQuizSessionMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startQuizSession>>, TError,{quizId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startQuizSession>>, TError,{quizId: number}, TContext> => {
+
+const mutationKey = ['startQuizSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startQuizSession>>, {quizId: number}> = (props) => {
+          const {quizId} = props ?? {};
+
+          return  startQuizSession(quizId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartQuizSessionMutationResult = NonNullable<Awaited<ReturnType<typeof startQuizSession>>>
+
+    export type StartQuizSessionMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Start (or resume) the student's quiz session. Starts the server-side timer on first call; later calls return the same deadline and the auto-saved answers.
+ */
+export const useStartQuizSession = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startQuizSession>>, TError,{quizId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof startQuizSession>>,
+        TError,
+        {quizId: number},
+        TContext
+      > => {
+      return useMutation(getStartQuizSessionMutationOptions(options));
+    }
+
+export const getSaveQuizSessionUrl = (quizId: number,) => {
+
+
+
+
+  return `/api/quizzes/${quizId}/session`
+}
+
+/**
+ * @summary Auto-save the student's in-progress answers. Rejected once the deadline (plus a short grace period) has passed.
+ */
+export const saveQuizSession = async (quizId: number,
+    quizAttemptInput: QuizAttemptInput, options?: RequestInit): Promise<QuizSession> => {
+
+  return customFetch<QuizSession>(getSaveQuizSessionUrl(quizId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(quizAttemptInput)
+  }
+);}
+
+
+
+
+
+export const getSaveQuizSessionMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveQuizSession>>, TError,{quizId: number;data: BodyType<QuizAttemptInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveQuizSession>>, TError,{quizId: number;data: BodyType<QuizAttemptInput>}, TContext> => {
+
+const mutationKey = ['saveQuizSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveQuizSession>>, {quizId: number;data: BodyType<QuizAttemptInput>}> = (props) => {
+          const {quizId,data} = props ?? {};
+
+          return  saveQuizSession(quizId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveQuizSessionMutationResult = NonNullable<Awaited<ReturnType<typeof saveQuizSession>>>
+    export type SaveQuizSessionMutationBody = BodyType<QuizAttemptInput>
+    export type SaveQuizSessionMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Auto-save the student's in-progress answers. Rejected once the deadline (plus a short grace period) has passed.
+ */
+export const useSaveQuizSession = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveQuizSession>>, TError,{quizId: number;data: BodyType<QuizAttemptInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveQuizSession>>,
+        TError,
+        {quizId: number;data: BodyType<QuizAttemptInput>},
+        TContext
+      > => {
+      return useMutation(getSaveQuizSessionMutationOptions(options));
     }
 
 export const getGradeQuizAttemptUrl = (attemptId: number,) => {

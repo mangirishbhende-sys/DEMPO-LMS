@@ -56,6 +56,7 @@ export function QuizFormDialog({
     title: string;
     description?: string | null;
     dueDate?: string | null;
+    timeLimitMinutes?: number | null;
     questions?: {
       type: string;
       prompt: string;
@@ -72,6 +73,9 @@ export function QuizFormDialog({
   const [description, setDescription] = useState(quiz?.description ?? "");
   const [dueDate, setDueDate] = useState(
     quiz?.dueDate ? quiz.dueDate.slice(0, 16) : "",
+  );
+  const [timeLimit, setTimeLimit] = useState(
+    quiz?.timeLimitMinutes ? String(quiz.timeLimitMinutes) : "",
   );
   const [questions, setQuestions] = useState<QuestionDraft[]>(
     quiz?.questions?.length
@@ -99,6 +103,11 @@ export function QuizFormDialog({
 
   const validate = (): string | null => {
     if (!title.trim()) return "Quiz title is required.";
+    if (timeLimit) {
+      const mins = Number(timeLimit);
+      if (!Number.isInteger(mins) || mins < 1 || mins > 600)
+        return "Time limit must be a whole number of minutes between 1 and 600, or left empty for no limit.";
+    }
     if (questions.length === 0) return "Add at least one question.";
     for (const [i, q] of questions.entries()) {
       if (!q.prompt.trim()) return `Question ${i + 1} needs a prompt.`;
@@ -127,6 +136,7 @@ export function QuizFormDialog({
       title: title.trim(),
       description: description.trim() || undefined,
       dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+      timeLimitMinutes: timeLimit ? Number(timeLimit) : undefined,
       questions: questions.map((q) => ({
         type: q.type,
         prompt: q.prompt.trim(),
@@ -141,7 +151,7 @@ export function QuizFormDialog({
       if (quiz) queryClient.invalidateQueries({ queryKey: getGetQuizQueryKey(quiz.id) });
       setOpen(false);
       if (!editing) {
-        setTitle(""); setDescription(""); setDueDate("");
+        setTitle(""); setDescription(""); setDueDate(""); setTimeLimit("");
         setQuestions([emptyQuestion("multiple_choice")]);
       }
     };
@@ -179,9 +189,29 @@ export function QuizFormDialog({
             <Label htmlFor="quiz-desc">Description</Label>
             <Textarea id="quiz-desc" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
-          <div className="space-y-2 max-w-xs">
-            <Label htmlFor="quiz-due">Due Date</Label>
-            <Input id="quiz-due" type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="quiz-due">Closes at</Label>
+              <Input id="quiz-due" type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} aria-describedby="quiz-due-help" />
+              <p id="quiz-due-help" className="text-xs text-muted-foreground">No submissions are accepted after this time.</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="quiz-limit">Time limit (minutes)</Label>
+              <Input
+                id="quiz-limit"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={600}
+                placeholder="No limit"
+                value={timeLimit}
+                onChange={(e) => setTimeLimit(e.target.value)}
+                aria-describedby="quiz-limit-help"
+              />
+              <p id="quiz-limit-help" className="text-xs text-muted-foreground">
+                Starts when each student presses Start. Answers auto-save; when time is up, saved answers are submitted.
+              </p>
+            </div>
           </div>
 
           <div className="space-y-4">

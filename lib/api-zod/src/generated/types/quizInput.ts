@@ -12,6 +12,11 @@ export interface QuizInput {
   title: string;
   description?: string;
   dueDate?: Date;
+  /**
+     * @minimum 1
+     * @maximum 600
+     */
+  timeLimitMinutes?: number;
   /** @minItems 1 */
   questions: QuizQuestionInput[];
 }

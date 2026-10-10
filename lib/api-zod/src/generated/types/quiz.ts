@@ -7,6 +7,7 @@
  */
 import type { QuizAttempt } from './quizAttempt';
 import type { QuizQuestion } from './quizQuestion';
+import type { QuizSession } from './quizSession';
 import type { QuizStatus } from './quizStatus';
 
 export interface Quiz {
@@ -17,6 +18,8 @@ export interface Quiz {
   description?: string | null;
   /** @nullable */
   dueDate?: Date | null;
+  /** @nullable */
+  timeLimitMinutes?: number | null;
   status: QuizStatus;
   /** @nullable */
   resultsPublishedAt?: Date | null;
@@ -26,4 +29,5 @@ export interface Quiz {
   attemptCount?: number;
   questions?: QuizQuestion[];
   myAttempt?: QuizAttempt | null;
+  mySession?: QuizSession | null;
 }

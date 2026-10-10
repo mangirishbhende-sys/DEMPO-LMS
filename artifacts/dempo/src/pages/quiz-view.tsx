@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import {
   useGetMe,
   useGetQuiz,
-  useCreateQuizAttempt,
   useListQuizAttempts,
   useGradeQuizAttempt,
   usePublishQuiz,
@@ -17,7 +16,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -25,8 +23,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { QuizFormDialog } from "@/components/quiz-dialog";
+import { StudentQuizExam } from "@/components/quiz-exam";
 import {
-  Loader2, Clock, Award, CheckCircle, CheckCircle2, XCircle, Circle,
+  Loader2, Clock, Award, CheckCircle, CheckCircle2, XCircle, Circle, Timer,
   Pencil, Trash2, Megaphone, Send, ListChecks, Type, ChevronDown, ChevronUp, Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -85,6 +84,13 @@ export default function QuizViewPage({ id }: { id: string }) {
                 {quiz.maxScore ?? 0} Points · {quiz.questionCount ?? 0} Questions
               </div>
             </div>
+            <div>
+              <div className="text-xs uppercase font-bold text-muted-foreground tracking-wider mb-1">Time Limit</div>
+              <div className="font-medium flex items-center gap-2">
+                <Timer className="w-4 h-4 text-primary" />
+                {quiz.timeLimitMinutes ? `${quiz.timeLimitMinutes} minutes` : "None"}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -134,7 +140,7 @@ function TeacherActions({ quiz }: { quiz: any }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Publish results to students?</AlertDialogTitle>
               <AlertDialogDescription>
-                Every attempt will be finalized (AI-suggested scores are accepted where you haven't adjusted them) and students will see their scores and the correct answers. This can't be undone.
+                Every attempt will be finalized and students will see their scores and the correct answers. Multiple-choice answers keep their automatic score. Short answers you have not scored yourself count as 0 — AI suggestions are never accepted automatically. Students still taking the quiz are submitted with their saved answers. This can't be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -318,6 +324,7 @@ function AttemptRow({ attempt, quiz, questions }: { attempt: any; quiz: any; que
             <div className="font-medium truncate">{attempt.studentName ?? "Student"}</div>
             <div className="text-sm text-muted-foreground">
               Submitted {format(new Date(attempt.submittedAt), "MMM d, h:mm a")}
+              {attempt.autoSubmitted && " · automatically, when time ran out (last saved answers)"}
             </div>
           </div>
           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${attempt.status === "graded" ? "bg-success/10 text-success border-success/20" : "bg-warning/12 text-warning border-warning/25"}`}>
@@ -406,108 +413,7 @@ function StudentQuizBody({ quiz }: { quiz: any }) {
       </Card>
     );
   }
-  return <StudentQuizForm quiz={quiz} />;
-}
-
-function StudentQuizForm({ quiz }: { quiz: any }) {
-  const [answers, setAnswers] = useState<Record<number, { selectedOption?: number; textAnswer?: string }>>({});
-  const createAttempt = useCreateQuizAttempt();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const questions = quiz.questions ?? [];
-
-  const unanswered = questions.filter((q: any) => {
-    const a = answers[q.id];
-    if (!a) return true;
-    if (q.type === "multiple_choice") return a.selectedOption == null;
-    return !a.textAnswer?.trim();
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createAttempt.mutate(
-      {
-        quizId: quiz.id,
-        data: {
-          answers: questions.map((q: any) => ({
-            questionId: q.id,
-            selectedOption: answers[q.id]?.selectedOption,
-            textAnswer: answers[q.id]?.textAnswer,
-          })),
-        },
-      },
-      {
-        onSuccess: () => {
-          toast({ title: "Quiz submitted", description: "Your answers were turned in." });
-          queryClient.invalidateQueries({ queryKey: getGetQuizQueryKey(quiz.id) });
-          queryClient.invalidateQueries({ queryKey: getListQuizzesQueryKey(quiz.courseId) });
-        },
-        onError: (err: any) =>
-          toast({ title: "Submission failed", description: err?.message || "Something went wrong.", variant: "destructive" }),
-      },
-    );
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {questions.map((q: any, i: number) => (
-        <Card key={q.id} className="shadow-sm">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <span className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shrink-0">{i + 1}</span>
-                <div className="font-medium text-lg">{q.prompt}</div>
-              </div>
-              <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded shrink-0">
-                {q.points} pt{q.points === 1 ? "" : "s"}
-              </span>
-            </div>
-
-            {q.type === "multiple_choice" ? (
-              <div className="space-y-2 pl-10">
-                {(q.options ?? []).map((opt: string, oi: number) => {
-                  const selected = answers[q.id]?.selectedOption === oi;
-                  return (
-                    <button
-                      key={oi}
-                      type="button"
-                      onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: { selectedOption: oi } }))}
-                      className={`w-full flex items-center gap-3 p-3 border rounded-lg text-left transition-colors ${selected ? "border-primary bg-primary/5" : "hover:bg-muted/40"}`}
-                    >
-                      {selected ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <Circle className="w-5 h-5 text-muted-foreground shrink-0" />}
-                      <span>{opt}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="pl-10">
-                <Textarea
-                  placeholder="Type your answer..."
-                  rows={4}
-                  value={answers[q.id]?.textAnswer ?? ""}
-                  onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: { textAnswer: e.target.value } }))}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-muted/20 border rounded-xl px-4 md:px-6 py-4">
-        <span className="text-sm text-muted-foreground">
-          {unanswered.length > 0
-            ? `${unanswered.length} question${unanswered.length === 1 ? "" : "s"} unanswered`
-            : "All questions answered"}
-          {" · "}You can only submit once.
-        </span>
-        <Button type="submit" size="lg" disabled={createAttempt.isPending} className="font-semibold px-8 w-full sm:w-auto shrink-0">
-          {createAttempt.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Submit Quiz
-        </Button>
-      </div>
-    </form>
-  );
+  return <StudentQuizExam quiz={quiz} />;
 }
 
 function StudentResults({ quiz }: { quiz: any }) {

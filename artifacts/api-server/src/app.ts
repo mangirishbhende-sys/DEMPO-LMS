@@ -1,10 +1,10 @@
 import path from "path";
 import express, { type Express } from "express";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import cors from "cors";
 import pinoHttp from "pino-http";
-import { clerkMiddleware } from "@clerk/express";
+import { clerkMiddleware, getAuth } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import {
   CLERK_PROXY_PATH,
@@ -32,6 +32,20 @@ app.use(
   }),
 );
 
+// Count requests per signed-in user, falling back to IP only for anonymous
+// traffic. Keying on IP alone breaks exams: a whole campus sits behind one
+// NAT address, so a few hundred students sharing it would exhaust a per-IP
+// limit within seconds and everyone would get 429s mid-quiz.
+function rateLimitKey(req: express.Request): string {
+  try {
+    const userId = getAuth(req).userId;
+    if (userId) return `user:${userId}`;
+  } catch {
+    // clerkMiddleware not applied (should not happen) — fall back to IP.
+  }
+  return ipKeyGenerator(req.ip ?? "");
+}
+
 // Baseline abuse ceiling on the API. NOTE: on Vercel serverless the default
 // store is per-instance (a determined attacker across many warm instances can
 // exceed this) — adequate for single-college traffic; move to a shared store
@@ -39,6 +53,7 @@ app.use(
 const apiLimiter = rateLimit({
   windowMs: 60_000,
   limit: 240, // ~4 req/sec per client per instance
+  keyGenerator: rateLimitKey,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "Too many requests, please slow down." },
@@ -48,6 +63,7 @@ const apiLimiter = rateLimit({
 const writeLimiter = rateLimit({
   windowMs: 60_000,
   limit: 20,
+  keyGenerator: rateLimitKey,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "Too many submissions in a short time, please wait." },

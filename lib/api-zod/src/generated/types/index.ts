@@ -106,6 +106,8 @@ export * from './quizQuestionInputType';
 export * from './quizQuestionType';
 export * from './quizResultSummary';
 export * from './quizResultSummaryStatus';
+export * from './quizSession';
+export * from './quizSessionAnswer';
 export * from './quizStatus';
 export * from './removeTeacherResult';
 export * from './setCoordinatorCoursesInput';

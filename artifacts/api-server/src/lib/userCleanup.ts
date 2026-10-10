@@ -13,6 +13,8 @@ import {
   submissionsTable,
   submissionSimilaritiesTable,
   activityLogsTable,
+  quizAttemptsTable,
+  quizSessionsTable,
 } from "@workspace/db";
 
 /**
@@ -127,6 +129,14 @@ export async function deleteUserAndReferences(
         .delete(submissionsTable)
         .where(inArray(submissionsTable.id, submissionIds));
     }
+
+    // Quiz attempts and in-progress/auto-saved quiz sessions.
+    await tx
+      .delete(quizAttemptsTable)
+      .where(eq(quizAttemptsTable.studentId, userId));
+    await tx
+      .delete(quizSessionsTable)
+      .where(eq(quizSessionsTable.studentId, userId));
 
     // Keep activity logs for auditing, but detach them from the user.
     await tx

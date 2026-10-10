@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
 import express, { type Express } from "express";
 import request from "supertest";
-import { inArray, eq } from "drizzle-orm";
+import { inArray, eq, and } from "drizzle-orm";
 import {
   db,
   usersTable,
@@ -10,6 +10,7 @@ import {
   quizzesTable,
   quizQuestionsTable,
   quizAttemptsTable,
+  quizSessionsTable,
 } from "@workspace/db";
 
 const mockGetAuth = vi.fn();
@@ -71,6 +72,9 @@ async function cleanup(): Promise<void> {
       .where(inArray(quizzesTable.courseId, ids));
     const qIds = quizzes.map((q) => q.id);
     if (qIds.length) {
+      await db
+        .delete(quizSessionsTable)
+        .where(inArray(quizSessionsTable.quizId, qIds));
       await db
         .delete(quizAttemptsTable)
         .where(inArray(quizAttemptsTable.quizId, qIds));
@@ -369,5 +373,206 @@ describe("quiz lifecycle, visibility and scoring", () => {
     const bob = attempts.body.find((a: any) => a.studentId === BOB);
     expect(bob.score).toBe(0);
     expect(bob.status).toBe("graded");
+  });
+});
+
+/* ---------------- Exam robustness ---------------- */
+
+describe("exam mode: server timer, auto-save, auto-submit", () => {
+  async function createPublished(extra: Record<string, unknown>): Promise<any> {
+    asUser(TEACHER_ID);
+    const created = await request(app)
+      .post(`/api/courses/${courseId}/quizzes`)
+      .send({ ...quizBody, title: `Exam ${Math.random()}`, ...extra });
+    expect(created.status).toBe(201);
+    await request(app).post(`/api/quizzes/${created.body.id}/publish`);
+    return created.body;
+  }
+
+  /** Pretend the student's time ran out a minute ago (past the grace period). */
+  async function expireSession(quizId: number, studentId: string): Promise<void> {
+    await db
+      .update(quizSessionsTable)
+      .set({ deadlineAt: new Date(Date.now() - 60_000) })
+      .where(
+        and(
+          eq(quizSessionsTable.quizId, quizId),
+          eq(quizSessionsTable.studentId, studentId),
+        ),
+      );
+  }
+
+  it("stores the time limit and requires Start before submitting a timed quiz", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    expect(quiz.timeLimitMinutes).toBe(30);
+    asUser(ALICE);
+    const res = await request(app)
+      .post(`/api/quizzes/${quiz.id}/attempts`)
+      .send({ answers: [] });
+    expect(res.status).toBe(409);
+  });
+
+  it("starts a server-side timer and resumes the same deadline on reload", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    asUser(ALICE);
+    const before = Date.now();
+    const first = await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    expect(first.status).toBe(200);
+    const deadline = new Date(first.body.deadlineAt).getTime();
+    expect(deadline - before).toBeGreaterThan(29 * 60_000);
+    expect(deadline - before).toBeLessThanOrEqual(30 * 60_000 + 5_000);
+    expect(first.body.serverNow).toBeTruthy();
+
+    // Reloading the page (or a second tab) must not reset the clock.
+    const again = await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    expect(again.status).toBe(200);
+    expect(again.body.deadlineAt).toBe(first.body.deadlineAt);
+    expect(again.body.startedAt).toBe(first.body.startedAt);
+  });
+
+  it("caps the deadline at the quiz due date", async () => {
+    const due = new Date(Date.now() + 10 * 60_000);
+    const quiz = await createPublished({ timeLimitMinutes: 60, dueDate: due.toISOString() });
+    asUser(ALICE);
+    const res = await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    expect(new Date(res.body.deadlineAt).getTime()).toBe(due.getTime());
+  });
+
+  it("auto-saves answers and returns them when the student comes back", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    const [mc, sa] = quiz.questions;
+    asUser(ALICE);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    const save = await request(app)
+      .put(`/api/quizzes/${quiz.id}/session`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 1 }, { questionId: sa.id, textAnswer: "half done" }] });
+    expect(save.status).toBe(200);
+    expect(save.body.saveCount).toBe(1);
+    expect(save.body.lastSavedAt).toBeTruthy();
+
+    const view = await request(app).get(`/api/quizzes/${quiz.id}`);
+    expect(view.body.mySession.answers).toHaveLength(2);
+    expect(view.body.mySession.answers.find((a: any) => a.questionId === sa.id).textAnswer).toBe("half done");
+  });
+
+  it("only lets enrolled students start a session", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    asUser(OUTSIDER);
+    expect((await request(app).post(`/api/quizzes/${quiz.id}/session`)).status).toBe(403);
+    asUser(TEACHER_ID);
+    expect((await request(app).post(`/api/quizzes/${quiz.id}/session`)).status).toBe(403);
+  });
+
+  it("locks question edits once a student has started", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    asUser(ALICE);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    asUser(TEACHER_ID);
+    const res = await request(app).put(`/api/quizzes/${quiz.id}`).send(quizBody);
+    expect(res.status).toBe(409);
+  });
+
+  it("after time is up, rejects saves and submits the last saved answers", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    const [mc] = quiz.questions;
+    asUser(ALICE);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    await request(app)
+      .put(`/api/quizzes/${quiz.id}/session`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 1 }] });
+    await expireSession(quiz.id, ALICE);
+
+    const late = await request(app)
+      .put(`/api/quizzes/${quiz.id}/session`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 0 }] });
+    expect(late.status).toBe(409);
+
+    const [attempt] = await db
+      .select()
+      .from(quizAttemptsTable)
+      .where(eq(quizAttemptsTable.quizId, quiz.id));
+    expect(attempt!.autoSubmitted).toBe(true);
+    // The saved (correct) answer counts, not the late change.
+    expect(attempt!.answers.find((a) => a.questionId === mc.id)?.autoScore).toBe(2);
+  });
+
+  it("a late Submit uses the saved answers instead of the late ones", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    const [mc] = quiz.questions;
+    asUser(BOB);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    await request(app)
+      .put(`/api/quizzes/${quiz.id}/session`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 0 }] });
+    await expireSession(quiz.id, BOB);
+
+    const res = await request(app)
+      .post(`/api/quizzes/${quiz.id}/attempts`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 1 }] });
+    expect(res.status).toBe(201);
+    expect(res.body.autoSubmitted).toBe(true);
+    expect(res.body.answers.find((a: any) => a.questionId === mc.id).selectedOption).toBe(0);
+  });
+
+  it("a submit inside the time limit is accepted normally", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    const [mc] = quiz.questions;
+    asUser(ALICE);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    const res = await request(app)
+      .post(`/api/quizzes/${quiz.id}/attempts`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 1 }] });
+    expect(res.status).toBe(201);
+    expect(res.body.autoSubmitted).toBe(false);
+    // Starting again after submitting is refused.
+    expect((await request(app).post(`/api/quizzes/${quiz.id}/session`)).status).toBe(409);
+  });
+
+  it("rejects submissions to an untimed quiz after its due date", async () => {
+    const quiz = await createPublished({ dueDate: new Date(Date.now() + 60 * 60_000).toISOString() });
+    await db
+      .update(quizzesTable)
+      .set({ dueDate: new Date(Date.now() - 5 * 60_000) })
+      .where(eq(quizzesTable.id, quiz.id));
+    asUser(ALICE);
+    const res = await request(app)
+      .post(`/api/quizzes/${quiz.id}/attempts`)
+      .send({ answers: [{ questionId: quiz.questions[0].id, selectedOption: 1 }] });
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatch(/closed/);
+  });
+
+  it("submits a student who disappeared when the teacher opens the results", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    const [mc] = quiz.questions;
+    asUser(BOB);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    await request(app)
+      .put(`/api/quizzes/${quiz.id}/session`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 1 }] });
+    await expireSession(quiz.id, BOB);
+
+    asUser(TEACHER_ID);
+    const res = await request(app).get(`/api/quizzes/${quiz.id}/attempts`);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].studentId).toBe(BOB);
+    expect(res.body[0].autoSubmitted).toBe(true);
+  });
+
+  it("publishing results submits students who are still mid-quiz", async () => {
+    const quiz = await createPublished({ timeLimitMinutes: 30 });
+    const [mc] = quiz.questions;
+    asUser(ALICE);
+    await request(app).post(`/api/quizzes/${quiz.id}/session`);
+    await request(app)
+      .put(`/api/quizzes/${quiz.id}/session`)
+      .send({ answers: [{ questionId: mc.id, selectedOption: 1 }] });
+
+    asUser(TEACHER_ID);
+    expect((await request(app).post(`/api/quizzes/${quiz.id}/publish-results`)).status).toBe(200);
+    asUser(ALICE);
+    const view = await request(app).get(`/api/quizzes/${quiz.id}`);
+    expect(view.body.myAttempt.score).toBe(2);
   });
 });

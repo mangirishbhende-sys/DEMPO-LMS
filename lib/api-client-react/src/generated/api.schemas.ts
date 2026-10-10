@@ -943,9 +943,31 @@ export interface QuizAttempt {
   score?: number | null;
   maxScore: number;
   status: QuizAttemptStatus;
+  autoSubmitted?: boolean;
   submittedAt: string;
   /** @nullable */
   gradedAt?: string | null;
+}
+
+export interface QuizSessionAnswer {
+  questionId: number;
+  /** @nullable */
+  selectedOption?: number | null;
+  /** @nullable */
+  textAnswer?: string | null;
+}
+
+export interface QuizSession {
+  quizId: number;
+  startedAt: string;
+  /** @nullable */
+  deadlineAt?: string | null;
+  /** Server clock at response time, so the browser can correct for a wrong device clock. */
+  serverNow: string;
+  /** @nullable */
+  lastSavedAt?: string | null;
+  saveCount: number;
+  answers: QuizSessionAnswer[];
 }
 
 export interface Quiz {
@@ -956,6 +978,8 @@ export interface Quiz {
   description?: string | null;
   /** @nullable */
   dueDate?: string | null;
+  /** @nullable */
+  timeLimitMinutes?: number | null;
   status: QuizStatus;
   /** @nullable */
   resultsPublishedAt?: string | null;
@@ -965,6 +989,7 @@ export interface Quiz {
   attemptCount?: number;
   questions?: QuizQuestion[];
   myAttempt?: QuizAttempt | null;
+  mySession?: QuizSession | null;
 }
 
 export type QuizQuestionInputType = typeof QuizQuestionInputType[keyof typeof QuizQuestionInputType];
@@ -991,6 +1016,11 @@ export interface QuizInput {
   title: string;
   description?: string;
   dueDate?: string;
+  /**
+     * @minimum 1
+     * @maximum 600
+     */
+  timeLimitMinutes?: number;
   /** @minItems 1 */
   questions: QuizQuestionInput[];
 }

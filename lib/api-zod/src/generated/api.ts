@@ -1079,6 +1079,7 @@ export const ListQuizzesResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "dueDate": zod.coerce.date().nullish(),
+  "timeLimitMinutes": zod.number().nullish(),
   "status": zod.enum(['draft', 'published']),
   "resultsPublishedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
@@ -1112,8 +1113,22 @@ export const ListQuizzesResponseItem = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+}),zod.null()]).optional(),
+  "mySession": zod.union([zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 }),zod.null()]).optional()
 })
 export const ListQuizzesResponse = zod.array(ListQuizzesResponseItem)
@@ -1127,6 +1142,8 @@ export const CreateQuizParams = zod.object({
 })
 
 
+export const createQuizBodyTimeLimitMinutesMax = 600;
+
 
 export const createQuizBodyQuestionsItemCorrectOptionMin = 0;
 
@@ -1138,6 +1155,7 @@ export const CreateQuizBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string().optional(),
   "dueDate": zod.coerce.date().optional(),
+  "timeLimitMinutes": zod.number().min(1).max(createQuizBodyTimeLimitMinutesMax).optional(),
   "questions": zod.array(zod.object({
   "type": zod.enum(['multiple_choice', 'short_answer']),
   "prompt": zod.string().min(1),
@@ -1153,6 +1171,7 @@ export const CreateQuizResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "dueDate": zod.coerce.date().nullish(),
+  "timeLimitMinutes": zod.number().nullish(),
   "status": zod.enum(['draft', 'published']),
   "resultsPublishedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
@@ -1186,8 +1205,22 @@ export const CreateQuizResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+}),zod.null()]).optional(),
+  "mySession": zod.union([zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 }),zod.null()]).optional()
 })
 
@@ -1205,6 +1238,7 @@ export const GetQuizResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "dueDate": zod.coerce.date().nullish(),
+  "timeLimitMinutes": zod.number().nullish(),
   "status": zod.enum(['draft', 'published']),
   "resultsPublishedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
@@ -1238,8 +1272,22 @@ export const GetQuizResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+}),zod.null()]).optional(),
+  "mySession": zod.union([zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 }),zod.null()]).optional()
 })
 
@@ -1252,6 +1300,8 @@ export const UpdateQuizParams = zod.object({
 })
 
 
+export const updateQuizBodyTimeLimitMinutesMax = 600;
+
 
 export const updateQuizBodyQuestionsItemCorrectOptionMin = 0;
 
@@ -1263,6 +1313,7 @@ export const UpdateQuizBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string().optional(),
   "dueDate": zod.coerce.date().optional(),
+  "timeLimitMinutes": zod.number().min(1).max(updateQuizBodyTimeLimitMinutesMax).optional(),
   "questions": zod.array(zod.object({
   "type": zod.enum(['multiple_choice', 'short_answer']),
   "prompt": zod.string().min(1),
@@ -1278,6 +1329,7 @@ export const UpdateQuizResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "dueDate": zod.coerce.date().nullish(),
+  "timeLimitMinutes": zod.number().nullish(),
   "status": zod.enum(['draft', 'published']),
   "resultsPublishedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
@@ -1311,8 +1363,22 @@ export const UpdateQuizResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+}),zod.null()]).optional(),
+  "mySession": zod.union([zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 }),zod.null()]).optional()
 })
 
@@ -1340,6 +1406,7 @@ export const PublishQuizResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "dueDate": zod.coerce.date().nullish(),
+  "timeLimitMinutes": zod.number().nullish(),
   "status": zod.enum(['draft', 'published']),
   "resultsPublishedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
@@ -1373,8 +1440,22 @@ export const PublishQuizResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+}),zod.null()]).optional(),
+  "mySession": zod.union([zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 }),zod.null()]).optional()
 })
 
@@ -1392,6 +1473,7 @@ export const PublishQuizResultsResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "dueDate": zod.coerce.date().nullish(),
+  "timeLimitMinutes": zod.number().nullish(),
   "status": zod.enum(['draft', 'published']),
   "resultsPublishedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
@@ -1425,8 +1507,22 @@ export const PublishQuizResultsResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+}),zod.null()]).optional(),
+  "mySession": zod.union([zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 }),zod.null()]).optional()
 })
 
@@ -1455,6 +1551,7 @@ export const ListQuizAttemptsResponseItem = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
 })
@@ -1497,8 +1594,65 @@ export const CreateQuizAttemptResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Start (or resume) the student's quiz session. Starts the server-side timer on first call; later calls return the same deadline and the auto-saved answers.
+ */
+export const StartQuizSessionParams = zod.object({
+  "quizId": zod.coerce.number()
+})
+
+export const StartQuizSessionResponse = zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Auto-save the student's in-progress answers. Rejected once the deadline (plus a short grace period) has passed.
+ */
+export const SaveQuizSessionParams = zod.object({
+  "quizId": zod.coerce.number()
+})
+
+export const saveQuizSessionBodyAnswersItemSelectedOptionMin = 0;
+
+
+
+export const SaveQuizSessionBody = zod.object({
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().min(saveQuizSessionBodyAnswersItemSelectedOptionMin).optional(),
+  "textAnswer": zod.string().optional()
+}))
+})
+
+export const SaveQuizSessionResponse = zod.object({
+  "quizId": zod.number(),
+  "startedAt": zod.coerce.date(),
+  "deadlineAt": zod.coerce.date().nullish(),
+  "serverNow": zod.coerce.date().describe('Server clock at response time, so the browser can correct for a wrong device clock.'),
+  "lastSavedAt": zod.coerce.date().nullish(),
+  "saveCount": zod.number(),
+  "answers": zod.array(zod.object({
+  "questionId": zod.number(),
+  "selectedOption": zod.number().nullish(),
+  "textAnswer": zod.string().nullish()
+}))
 })
 
 
@@ -1538,6 +1692,7 @@ export const GradeQuizAttemptResponse = zod.object({
   "score": zod.number().nullish(),
   "maxScore": zod.number(),
   "status": zod.enum(['submitted', 'graded']),
+  "autoSubmitted": zod.boolean().optional(),
   "submittedAt": zod.coerce.date(),
   "gradedAt": zod.coerce.date().nullish()
 })
