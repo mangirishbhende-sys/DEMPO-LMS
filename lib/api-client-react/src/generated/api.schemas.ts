@@ -5,18 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-
-export interface GroupRemovalImpactTask {
-  id: number;
-  description: string;
-  assigneeId: string;
-  assigneeName?: string | null;
-}
-
-export interface GroupRemovalImpact {
-  openTasks: GroupRemovalImpactTask[];
-  submissionsCount: number;
-}
 export interface HealthStatus {
   status: string;
 }
@@ -453,6 +441,23 @@ export interface GroupTaskUpdate {
   description?: string;
   assigneeId?: string;
   done?: boolean;
+}
+
+export interface GroupRemovalImpactInput {
+  removedIds: string[];
+}
+
+export interface GroupRemovalImpactTask {
+  id: number;
+  description: string;
+  assigneeId: string;
+  /** @nullable */
+  assigneeName?: string | null;
+}
+
+export interface GroupRemovalImpact {
+  openTasks: GroupRemovalImpactTask[];
+  submissionsCount: number;
 }
 
 export interface InviteInput {

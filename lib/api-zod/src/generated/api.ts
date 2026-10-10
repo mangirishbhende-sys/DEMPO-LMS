@@ -2864,13 +2864,17 @@ export const GetGroupRemovalImpactParams = zod.object({
   "groupId": zod.coerce.number()
 })
 
+export const GetGroupRemovalImpactBody = zod.object({
+  "removedIds": zod.array(zod.string())
+})
+
 export const GetGroupRemovalImpactResponse = zod.object({
   "openTasks": zod.array(zod.object({
-    "id": zod.number(),
-    "description": zod.string(),
-    "assigneeId": zod.string(),
-    "assigneeName": zod.string().nullish()
-  })),
+  "id": zod.number(),
+  "description": zod.string(),
+  "assigneeId": zod.string(),
+  "assigneeName": zod.string().nullish()
+})),
   "submissionsCount": zod.number()
 })
 

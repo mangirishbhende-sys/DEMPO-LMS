@@ -33,6 +33,7 @@ import {
   UpdateGroupTaskResponse,
   DeleteGroupTaskParams,
   GetGroupRemovalImpactParams,
+  GetGroupRemovalImpactBody,
   GetGroupRemovalImpactResponse,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
@@ -275,13 +276,18 @@ router.patch(
   },
 );
 
-router.get(
+router.post(
   "/groups/:groupId/removal-impact",
   requireAuth,
   async (req, res): Promise<void> => {
     const params = GetGroupRemovalImpactParams.safeParse(req.params);
     if (!params.success) {
       res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const body = GetGroupRemovalImpactBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
       return;
     }
     const group = await getGroup(params.data.groupId);
@@ -295,13 +301,7 @@ router.get(
       return;
     }
 
-    // Parse removedIds from query string (sent as removedIds[] repeated params)
-    const rawIds = req.query["removedIds[]"];
-    const removedIds: string[] = Array.isArray(rawIds)
-      ? (rawIds as string[])
-      : rawIds
-        ? [rawIds as string]
-        : [];
+    const removedIds = body.data.removedIds;
 
     if (removedIds.length === 0) {
       res.json(GetGroupRemovalImpactResponse.parse({ openTasks: [], submissionsCount: 0 }));

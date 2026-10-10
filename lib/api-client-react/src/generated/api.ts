@@ -24,7 +24,6 @@ import type {
   AddCohortMemberInput,
   AdminUserUpdate,
   Assignment,
-  GroupRemovalImpact,
   AssignmentInput,
   AssignmentUpdate,
   CalendarData,
@@ -52,6 +51,8 @@ import type {
   FeedbackList,
   FeedbackNote,
   GradeInput,
+  GroupRemovalImpact,
+  GroupRemovalImpactInput,
   GroupTask,
   GroupTaskInput,
   GroupTaskUpdate,
@@ -7199,56 +7200,75 @@ export const useDeleteGroupTask = <TError = ErrorType<unknown>,
       return useMutation(getDeleteGroupTaskMutationOptions(options));
     }
 
-export const getGetGroupRemovalImpactUrl = (groupId: number, removedIds: string[]) => {
-  const params = new URLSearchParams();
-  removedIds.forEach((id) => params.append('removedIds[]', id));
-  return `/api/groups/${groupId}/removal-impact?${params.toString()}`;
-};
+export const getGetGroupRemovalImpactUrl = (groupId: number,) => {
 
-/**
- * @summary Get removal impact for a group – tasks and submissions affected when members are removed (teacher only)
- */
-export const getGroupRemovalImpact = async (groupId: number, removedIds: string[], options?: RequestInit): Promise<GroupRemovalImpact> => {
-  return customFetch<GroupRemovalImpact>(getGetGroupRemovalImpactUrl(groupId, removedIds), {
-    ...options,
-    method: 'GET',
-  });
-};
 
-export const getGetGroupRemovalImpactQueryKey = (groupId: number, removedIds: string[]) =>
-  [`/api/groups/${groupId}/removal-impact`, ...removedIds] as const;
 
-export const getGetGroupRemovalImpactQueryOptions = <TData = Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError = ErrorType<unknown>>(
-  groupId: number,
-  removedIds: string[],
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError, TData>; request?: SecondParameter<typeof customFetch> },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-  const queryKey = queryOptions?.queryKey ?? getGetGroupRemovalImpactQueryKey(groupId, removedIds);
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getGroupRemovalImpact>>> = ({ signal }) =>
-    getGroupRemovalImpact(groupId, removedIds, { signal, ...requestOptions });
-  return {
-    queryKey,
-    queryFn,
-    enabled: groupId !== null && groupId !== undefined && removedIds.length > 0,
-    ...queryOptions,
-  } as UseQueryOptions<Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError, TData> & { queryKey: QueryKey };
-};
 
-export type GetGroupRemovalImpactQueryResult = NonNullable<Awaited<ReturnType<typeof getGroupRemovalImpact>>>;
-export type GetGroupRemovalImpactQueryError = ErrorType<unknown>;
-
-/**
- * @summary Get removal impact for a group – tasks and submissions affected when members are removed (teacher only)
- */
-export function useGetGroupRemovalImpact<TData = Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError = ErrorType<unknown>>(
-  groupId: number,
-  removedIds: string[],
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError, TData>; request?: SecondParameter<typeof customFetch> },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetGroupRemovalImpactQueryOptions(groupId, removedIds, options);
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-  query.queryKey = queryOptions.queryKey;
-  return query;
+  return `/api/groups/${groupId}/removal-impact`
 }
+
+/**
+ * @summary Get removal impact for a group – tasks and submissions affected when members are removed (teacher only)
+ */
+export const getGroupRemovalImpact = async (groupId: number,
+    groupRemovalImpactInput: GroupRemovalImpactInput, options?: RequestInit): Promise<GroupRemovalImpact> => {
+
+  return customFetch<GroupRemovalImpact>(getGetGroupRemovalImpactUrl(groupId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(groupRemovalImpactInput)
+  }
+);}
+
+
+
+
+
+export const getGetGroupRemovalImpactMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError,{groupId: number;data: BodyType<GroupRemovalImpactInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError,{groupId: number;data: BodyType<GroupRemovalImpactInput>}, TContext> => {
+
+const mutationKey = ['getGroupRemovalImpact'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getGroupRemovalImpact>>, {groupId: number;data: BodyType<GroupRemovalImpactInput>}> = (props) => {
+          const {groupId,data} = props ?? {};
+
+          return  getGroupRemovalImpact(groupId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GetGroupRemovalImpactMutationResult = NonNullable<Awaited<ReturnType<typeof getGroupRemovalImpact>>>
+    export type GetGroupRemovalImpactMutationBody = BodyType<GroupRemovalImpactInput>
+    export type GetGroupRemovalImpactMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Get removal impact for a group – tasks and submissions affected when members are removed (teacher only)
+ */
+export const useGetGroupRemovalImpact = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getGroupRemovalImpact>>, TError,{groupId: number;data: BodyType<GroupRemovalImpactInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof getGroupRemovalImpact>>,
+        TError,
+        {groupId: number;data: BodyType<GroupRemovalImpactInput>},
+        TContext
+      > => {
+      return useMutation(getGetGroupRemovalImpactMutationOptions(options));
+    }
 

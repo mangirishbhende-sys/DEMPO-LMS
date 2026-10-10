@@ -116,7 +116,7 @@ function GroupFormDialog({
       if (removedIds.length > 0) {
         setImpactLoading(true);
         try {
-          const impact = await getGroupRemovalImpact(groupId, removedIds);
+          const impact = await getGroupRemovalImpact(groupId, { removedIds });
           if (impact.openTasks.length > 0 || impact.submissionsCount > 0) {
             setImpactConfirm({ values, close, impact });
             return; // Wait for teacher to confirm

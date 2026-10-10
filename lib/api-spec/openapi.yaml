@@ -1942,6 +1942,31 @@ paths:
         "204":
           description: Deleted
 
+  # Previously existed only as hand-written code inside the generated clients
+  # (not in this spec), so re-running codegen silently deleted it. POST with a
+  # body (not GET + query) so the path-param and query-param types don't both
+  # generate as GetGroupRemovalImpactParams.
+  /groups/{groupId}/removal-impact:
+    post:
+      operationId: getGroupRemovalImpact
+      tags: [groups]
+      summary: Get removal impact for a group – tasks and submissions affected when members are removed (teacher only)
+      parameters:
+        - $ref: "#/components/parameters/GroupId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupRemovalImpactInput"
+      responses:
+        "200":
+          description: Impact of removing the given members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupRemovalImpact"
+
 components:
   parameters:
     CourseId:
@@ -2559,6 +2584,39 @@ components:
           type: string
         done:
           type: boolean
+
+    GroupRemovalImpactInput:
+      type: object
+      required: [removedIds]
+      properties:
+        removedIds:
+          type: array
+          items:
+            type: string
+
+    GroupRemovalImpactTask:
+      type: object
+      required: [id, description, assigneeId]
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        assigneeId:
+          type: string
+        assigneeName:
+          type: ["string", "null"]
+
+    GroupRemovalImpact:
+      type: object
+      required: [openTasks, submissionsCount]
+      properties:
+        openTasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupRemovalImpactTask"
+        submissionsCount:
+          type: integer
 
     InviteInput:
       type: object
