@@ -1,7 +1,7 @@
 import { MessageSquare, Trophy, Clock, CalendarDays, CheckCircle, GraduationCap, BookOpen, Loader2, ArrowRight, FileText } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { useLocation, Link } from "wouter";
-import { SignIn, SignUp, useAuth } from "@clerk/react";
+import { SignIn, SignUp, useAuth } from "@/lib/session";
 import { useGetMe, useUpdateMe } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

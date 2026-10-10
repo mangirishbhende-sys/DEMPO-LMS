@@ -14,6 +14,9 @@ import {
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { logActivity } from "./lib/activityLog";
+import { LOCAL_DEMO_AUTH } from "./lib/demoAuth";
+import { db, usersTable } from "@workspace/db";
+import { like } from "drizzle-orm";
 
 const app: Express = express();
 
@@ -41,7 +44,7 @@ function rateLimitKey(req: express.Request): string {
     const userId = getAuth(req).userId;
     if (userId) return `user:${userId}`;
   } catch {
-    // clerkMiddleware not applied (should not happen) — fall back to IP.
+    // clerkMiddleware not applied (local demo mode) — fall back to IP.
   }
   return ipKeyGenerator(req.ip ?? "");
 }
@@ -89,7 +92,7 @@ app.use(
   }),
 );
 
-app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
+if (!LOCAL_DEMO_AUTH) app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
 // Restrict credentialed CORS to configured web origins (CORS_ALLOWED_ORIGINS
 // or APP_BASE_URL, comma-separated). If none are configured, allow any origin
@@ -117,14 +120,31 @@ app.use(
 app.use(express.json({ limit: "512kb" }));
 app.use(express.urlencoded({ extended: true, limit: "512kb" }));
 
-app.use(
-  clerkMiddleware((req) => ({
-    publishableKey: publishableKeyFromHost(
-      getClerkProxyHost(req) ?? "",
-      process.env.CLERK_PUBLISHABLE_KEY,
-    ),
-  })),
-);
+if (LOCAL_DEMO_AUTH) {
+  logger.warn("LOCAL_DEMO_AUTH is on: Clerk is bypassed. Local preview only.");
+  // Lists the seeded demo accounts for the offline sign-in picker.
+  app.get("/api/demo/users", async (req, res) => {
+    if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(req.socket.remoteAddress ?? "")) {
+      res.status(403).json({ error: "Demo login is only available on this computer." });
+      return;
+    }
+    const users = await db
+      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, role: usersTable.role, isAdmin: usersTable.isAdmin })
+      .from(usersTable)
+      .where(like(usersTable.id, "demo\\_%"))
+      .orderBy(usersTable.id);
+    res.json(users);
+  });
+} else {
+  app.use(
+    clerkMiddleware((req) => ({
+      publishableKey: publishableKeyFromHost(
+        getClerkProxyHost(req) ?? "",
+        process.env.CLERK_PUBLISHABLE_KEY,
+      ),
+    })),
+  );
+}
 
 // Tighter limit on the expensive write paths, then the baseline limit on the
 // rest of the API.

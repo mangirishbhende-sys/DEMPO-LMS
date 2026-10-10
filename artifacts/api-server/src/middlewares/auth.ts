@@ -3,6 +3,7 @@ import { getAuth, clerkClient } from "@clerk/express";
 import { eq } from "drizzle-orm";
 import { db, usersTable, teacherInvitesTable, appInvitesTable, cohortMembersTable, type User } from "@workspace/db";
 import { logActivity } from "../lib/activityLog";
+import { LOCAL_DEMO_AUTH, demoUserIdFromRequest } from "../lib/demoAuth";
 
 // Emails that are automatically provisioned as teacher + admin. Configured via
 // the ADMIN_EMAILS env var (comma-separated). Empty by default — no hardcoded
@@ -54,6 +55,22 @@ export async function requireAuth(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
+  if (LOCAL_DEMO_AUTH) {
+    // Offline preview: seeded demo users only, no Clerk, no provisioning.
+    const demoId = demoUserIdFromRequest(req);
+    const [demoUser] = demoId
+      ? await db.select().from(usersTable).where(eq(usersTable.id, demoId))
+      : [];
+    if (!demoUser) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    req.userId = demoUser.id;
+    req.localUser = demoUser;
+    next();
+    return;
+  }
+
   const auth = getAuth(req);
   const userId = auth?.userId;
   if (!userId) {

@@ -33,6 +33,21 @@ Teachers run courses, assignments, timed quizzes, a weighted gradebook, attendan
 | `lib/api-spec/openapi.yaml` | API contract. **Edit this, then run codegen; never hand-edit `lib/*/generated`.** |
 | `artifacts/mockup-sandbox/` | Design playground from the Replit era. Not deployed. |
 
+## Offline demo (no accounts, no internet)
+
+For presenting on a laptop: set `LOCAL_DEMO_AUTH=true` and `VITE_LOCAL_DEMO_AUTH=true` in `.env` (plus `DATABASE_URL` and `PORT=8080`), then run:
+
+```bash
+pnpm --filter @workspace/db run push
+```
+```bash
+pnpm --filter @workspace/scripts run seed-demo
+```
+
+Start the API and web app as in step 8 below. The sign-in page then lists demo users (teacher/admin, dean, three students). The demo course has invite code `DEMOHR` and includes a 10-minute timed quiz.
+
+**Guard rails** (`artifacts/api-server/src/lib/demoAuth.ts`): the server refuses to start in demo mode when `NODE_ENV=production`, accepts demo logins only from this computer, and only for user ids starting `demo_`. **Never enable it on a deployed server.**
+
 ## Run it locally (tested on Windows 10; works the same in macOS/Linux shells)
 
 Every failure we hit getting here is logged in [`docs/takeover/03-failure-log.md`](docs/takeover/03-failure-log.md).

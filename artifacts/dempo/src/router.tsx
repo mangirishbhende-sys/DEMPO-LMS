@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Redirect } from "wouter";
-import { useAuth, SignOutButton } from "@clerk/react";
+import { useAuth, SignOutButton } from "@/lib/session";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { Loader2, MailQuestion } from "lucide-react";
 import { Shell } from "@/components/layout";

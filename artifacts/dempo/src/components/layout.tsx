@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
-import { SignOutButton, useAuth } from "@clerk/react";
+import { SignOutButton, useAuth } from "@/lib/session";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, BookOpen, GraduationCap, LayoutDashboard, Settings, MessageSquare, Menu, ScrollText, Users as UsersIcon, CalendarDays, NotebookPen, Mail, BarChart3, Target } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
