@@ -2,26 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Dempo Learn</title>
-    <meta name="description" content="Dempo Learn — a purposeful classroom workspace for professional graduate programs." />
+    <!-- No maximum-scale: students must be able to pinch-zoom (WCAG 1.4.4). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Keep in sync with src/lib/brand.ts -->
+    <title>Mandovi · Dempo</title>
+    <meta name="description" content="Mandovi — exam-ready learning for Dempo. Coursework, timed quizzes and marks, with student data kept in India." />
+    <meta name="theme-color" content="#0F626B" />
     <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="Dempo Learn" />
-    <meta property="og:description" content="Dempo Learn — a purposeful classroom workspace for professional graduate programs." />
+    <meta property="og:title" content="Mandovi · Dempo" />
+    <meta property="og:description" content="Exam-ready learning for Dempo. Coursework, timed quizzes and marks, with student data kept in India." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://learning-hub-christyphilipd9.replit.app/" />
-    <meta property="og:image" content="https://learning-hub-christyphilipd9.replit.app/og-image.png" />
+    <!-- og:url / absolute og:image intentionally omitted until the production
+         domain is decided; they previously pointed at an unrelated Replit app. -->
+    <meta property="og:image" content="/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Dempo Learn crest" />
+    <meta property="og:image:alt" content="Dempo crest" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://learning-hub-christyphilipd9.replit.app/og-image.png" />
-    <meta name="twitter:title" content="Dempo Learn" />
-    <meta name="twitter:description" content="Dempo Learn — a purposeful classroom workspace for professional graduate programs." />
+    <meta name="twitter:title" content="Mandovi · Dempo" />
+    <meta name="twitter:description" content="Exam-ready learning for Dempo. Coursework, timed quizzes and marks, with student data kept in India." />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts are loaded once, from src/index.css. -->
   </head>
   <body>
     <script>

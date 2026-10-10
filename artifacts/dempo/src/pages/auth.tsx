@@ -5,6 +5,7 @@ import { SignIn, SignUp, useAuth } from "@clerk/react";
 import { useGetMe, useUpdateMe } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BRAND } from "@/lib/brand";
 
 /* ---------------- Auth shell (sign in / sign up) ---------------- */
 
@@ -13,7 +14,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: st
     <div className="min-h-screen flex flex-col justify-center bg-background py-12 px-4 sm:px-6">
       <div className="mx-auto w-full max-w-md flex flex-col items-center">
         <Link href="/" className="flex flex-col items-center">
-          <img src={import.meta.env.BASE_URL + "logo.png"} alt="Dempo Learn" className="w-11 h-11 mb-5" />
+          <img src={import.meta.env.BASE_URL + "logo.png"} alt={BRAND.name} className="w-11 h-11 mb-5" />
         </Link>
         <h1 className="text-center text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
         {subtitle && <p className="mt-1.5 text-center text-sm text-muted-foreground">{subtitle}</p>}
@@ -32,7 +33,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle?: st
 
 export function SignInPage() {
   return (
-    <AuthShell title="Sign in to Dempo Learn" subtitle="Welcome back.">
+    <AuthShell title={`Sign in to ${BRAND.name}`} subtitle="Welcome back.">
       <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
     </AuthShell>
   );
@@ -40,7 +41,7 @@ export function SignInPage() {
 
 export function SignUpPage() {
   return (
-    <AuthShell title="Create your account" subtitle="Set up your Dempo Learn profile.">
+    <AuthShell title="Create your account" subtitle={`Set up your ${BRAND.name} profile.`}>
       <SignUp routing="path" path="/sign-up" signInUrl="/sign-in" />
     </AuthShell>
   );
@@ -73,8 +74,8 @@ export function RolePickerPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4">
       <div className="mx-auto w-full max-w-md flex flex-col items-center text-center">
-        <img src={import.meta.env.BASE_URL + "logo.png"} alt="Dempo Learn" className="w-12 h-12 mb-6" />
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-2">Welcome to Dempo Learn</h1>
+        <img src={import.meta.env.BASE_URL + "logo.png"} alt={BRAND.name} className="w-12 h-12 mb-6" />
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-2">Welcome to {BRAND.name}</h1>
         <p className="text-muted-foreground max-w-sm mb-10">
           Let's set you up as a student — join courses, submit work, and track your grades and feedback.
         </p>
@@ -93,7 +94,7 @@ export function RolePickerPage() {
           </CardContent>
         </Card>
         <p className="text-sm text-muted-foreground mt-6">
-          Teaching on Dempo? Your administrator will set up your educator account.
+          Teaching on {BRAND.name}? Your administrator will set up your educator account.
         </p>
       </div>
     </div>
@@ -105,8 +106,8 @@ export function RolePickerPage() {
 const FEATURES = [
   {
     icon: GraduationCap,
-    title: "Faster grading, better feedback",
-    body: "AI drafts grades and comments; professors review and approve. Less time marking, quicker feedback for students.",
+    title: "Exams that survive bad WiFi",
+    body: "Answers save as students type. The timer runs on our server, so a dropped connection or closed tab never costs anyone their work.",
   },
   {
     icon: FileText,
@@ -115,8 +116,8 @@ const FEATURES = [
   },
   {
     icon: MessageSquare,
-    title: "Conversations, not lost emails",
-    body: "Message your professor where the work lives. Questions and feedback stay attached to the course.",
+    title: "Marks the way the college computes them",
+    body: "Weighted components, rubrics and a per-student transcript — exportable for the exam cell, not just a list of points.",
   },
 ];
 
@@ -136,8 +137,8 @@ export function LandingPage() {
       <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 md:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={import.meta.env.BASE_URL + "logo.png"} alt="Dempo Learn" className="w-7 h-7 rounded-md" />
-            <span className="font-semibold text-[15px]">Dempo Learn</span>
+            <img src={import.meta.env.BASE_URL + "logo.png"} alt={BRAND.name} className="w-7 h-7 rounded-md" />
+            <span className="font-semibold text-[15px]">{BRAND.name}</span>
           </div>
           <Button asChild size="sm">
             <Link href="/sign-in">Sign in</Link>
@@ -149,13 +150,13 @@ export function LandingPage() {
       <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 pb-16 text-center">
         <div className="mx-auto max-w-2xl">
           <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground mb-6">
-            Dempo AI Business School
+            {BRAND.school}
           </span>
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.1]">
-            Everything your class needs, in one calm place.
+            Coursework, quizzes and marks — built for how Dempo actually runs.
           </h1>
           <p className="mt-5 text-lg text-muted-foreground">
-            Course plans, assignments, feedback, and grades — organized so students and professors can focus on the work, not the tooling.
+            Timed quizzes that survive a dropped WiFi connection, a weighted gradebook, and student records kept in India. Owned by the college, not an ad company.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
             <Button asChild size="lg">
@@ -174,12 +175,12 @@ export function LandingPage() {
             <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground/25" />
             <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground/25" />
             <div className="ml-3 flex-1 max-w-xs h-6 rounded-md bg-background border text-[11px] text-muted-foreground flex items-center px-3">
-              dempolearn.app/dashboard
+              learn.dempo.in/dashboard
             </div>
           </div>
           <div className="p-6 sm:p-8 space-y-6 text-left">
             <div>
-              <div className="text-xl font-semibold tracking-tight">Welcome back, Maya</div>
+              <div className="text-xl font-semibold tracking-tight">Welcome back, Riya</div>
               <div className="text-sm text-muted-foreground">Here's your overview for today.</div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -233,9 +234,9 @@ export function LandingPage() {
                   </div>
                   <div className="divide-y">
                     {[
-                      { rank: 1, name: "J. Okafor", score: "95%", me: false },
+                      { rank: 1, name: "A. Naik", score: "95%", me: false },
                       { rank: 2, name: "You", score: "92%", me: true },
-                      { rank: 3, name: "L. Chen", score: "89%", me: false },
+                      { rank: 3, name: "S. Kamat", score: "89%", me: false },
                     ].map((e) => (
                       <div key={e.rank} className={`px-4 py-2 flex items-center gap-3 ${e.me ? "bg-muted/60" : ""}`}>
                         <span className="w-5 text-xs font-semibold text-muted-foreground">#{e.rank}</span>
@@ -260,9 +261,9 @@ export function LandingPage() {
       <section className="border-t bg-muted/30">
         <div className="mx-auto max-w-6xl px-5 md:px-8 py-20">
           <div className="max-w-xl mb-12">
-            <h2 className="text-3xl font-semibold tracking-tight">Built for how classes actually run</h2>
+            <h2 className="text-3xl font-semibold tracking-tight">Why not just a free classroom app?</h2>
             <p className="mt-3 text-muted-foreground">
-              A focused set of tools that stay out of the way — for a single professor or a whole department.
+              Because exam day, the gradebook and student data are where free tools stop.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
@@ -283,7 +284,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl px-5 md:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <img src={import.meta.env.BASE_URL + "logo.png"} alt="" className="w-5 h-5 rounded" />
-            <span>© {new Date().getFullYear()} Srinivassa Sinai Dempo College (Autonomous)</span>
+            <span>© {new Date().getFullYear()} {BRAND.org}</span>
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/legal/privacy" className="hover:text-foreground">Privacy</Link>

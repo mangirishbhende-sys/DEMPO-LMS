@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GroupRosterCard, GroupTasksPanel } from "@/components/group-panel";
 import { Users as UsersIcon } from "lucide-react";
+import { BRAND } from "@/lib/brand";
 
 export default function SubmissionViewPage({ id }: { id: string }) {
   const submissionId = parseInt(id, 10);
@@ -138,7 +139,7 @@ export default function SubmissionViewPage({ id }: { id: string }) {
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Dempo Learn AI Analysis</span>
+                <span className="text-xs uppercase font-bold tracking-widest text-muted-foreground">{BRAND.name} AI analysis</span>
               </div>
               <CardTitle className="text-lg font-semibold">Draft Assessment</CardTitle>
             </CardHeader>

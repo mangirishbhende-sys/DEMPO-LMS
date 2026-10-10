@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Mono:wght@500&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -85,67 +85,74 @@
   --elevate-1: rgba(55, 53, 47, 0.04);
   --elevate-2: rgba(55, 53, 47, 0.08);
 
-  /* Notion-neutral: white canvas, warm near-black ink, hairline warm-gray lines */
+  /*
+   * Mandovi (light). Deep river-teal primary on white, cool slate neutrals.
+   * Every text/background pair below is >= 4.5:1 (WCAG AA) and the input
+   * border is >= 3:1; ratios are in docs/takeover/06-design-rationale.md and
+   * reproducible with docs/takeover/contrast-check.mjs. Re-run it if you
+   * change any value here.
+   */
   --background: 0 0% 100%;
-  --foreground: 40 8% 18%;
-  --border: 42 10% 90%;
+  --foreground: 200 25% 12%;           /* #172126  16.4:1 */
+  --border: 190 15% 85%;
 
   --card: 0 0% 100%;
-  --card-foreground: 40 8% 18%;
-  --card-border: 42 10% 90%;
+  --card-foreground: 200 25% 12%;
+  --card-border: 190 15% 85%;
 
-  --sidebar: 48 12% 97%;
-  --sidebar-foreground: 40 6% 30%;
-  --sidebar-border: 42 10% 91%;
-  --sidebar-primary: 40 8% 18%;
+  --sidebar: 190 25% 97%;
+  --sidebar-foreground: 200 15% 28%;   /* 8.5:1 */
+  --sidebar-border: 190 15% 88%;
+  --sidebar-primary: 186 75% 24%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 45 12% 93%;
-  --sidebar-accent-foreground: 40 8% 18%;
-  --sidebar-ring: 212 78% 51%;
+  --sidebar-accent: 186 35% 93%;
+  --sidebar-accent-foreground: 186 70% 18%;
+  --sidebar-ring: 186 75% 30%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 40 8% 18%;
-  --popover-border: 42 10% 90%;
+  --popover-foreground: 200 25% 12%;
+  --popover-border: 190 15% 85%;
 
-  --primary: 40 8% 18%;
+  --primary: 186 75% 24%;              /* #0F626B  7.1:1 with white */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 45 12% 95%;
-  --secondary-foreground: 40 8% 18%;
+  --secondary: 190 20% 94%;
+  --secondary-foreground: 200 25% 12%;
 
-  --muted: 48 10% 96%;
-  --muted-foreground: 40 4% 45%;
+  --muted: 190 20% 96%;
+  --muted-foreground: 200 10% 38%;     /* 6.1:1 on white, 5.6:1 on muted */
 
-  --accent: 45 12% 94%;
-  --accent-foreground: 40 8% 18%;
+  --accent: 186 35% 93%;
+  --accent-foreground: 186 70% 18%;    /* 9.0:1 */
 
-  --destructive: 2 64% 52%;
+  --destructive: 4 70% 42%;            /* #B62A20  6.3:1 */
   --destructive-foreground: 0 0% 100%;
 
-  --input: 42 10% 88%;
-  --ring: 212 78% 51%;
+  --input: 190 12% 54%;                /* field outline 3.2:1 (WCAG 1.4.11) */
+  --ring: 186 75% 30%;
 
-  /* Restrained, muted chart/status hues */
-  --chart-1: 212 60% 48%;
-  --chart-2: 146 38% 42%;
-  --chart-3: 35 60% 50%;
-  --chart-4: 262 45% 55%;
-  --chart-5: 2 64% 55%;
+  /* Charts: distinguishable hues, never the only carrier of meaning. */
+  --chart-1: 186 70% 32%;
+  --chart-2: 32 85% 45%;
+  --chart-3: 152 50% 36%;
+  --chart-4: 262 40% 52%;
+  --chart-5: 4 65% 50%;
 
-  --success: 146 38% 40%;
+  --success: 152 60% 26%;              /* 6.6:1; 5.5:1 inside a /12 chip */
   --success-foreground: 0 0% 100%;
-  --warning: 35 62% 46%;
+  --warning: 32 95% 29%;               /* 6.4:1 — dark amber so it can be text */
   --warning-foreground: 0 0% 100%;
-  --danger: 2 64% 52%;
+  --danger: 4 70% 42%;
   --danger-foreground: 0 0% 100%;
-  --info: 212 72% 47%;
+  --info: 210 70% 38%;
   --info-foreground: 0 0% 100%;
 
-  --app-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --app-font-serif: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --app-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* IBM Plex: one family, with a Devanagari companion for future Konkani/Marathi/Hindi UI. */
+  --app-font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --app-font-serif: 'IBM Plex Serif', Georgia, serif;
+  --app-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --radius: 0.5rem;
+  --radius: 0.375rem;
 
   --shadow-sm: 0 1px 2px 0 rgb(15 15 15 / 0.04);
   --shadow: 0 1px 2px 0 rgb(15 15 15 / 0.05);
@@ -165,60 +172,60 @@
   --elevate-1: rgba(255, 255, 255, 0.05);
   --elevate-2: rgba(255, 255, 255, 0.10);
 
-  /* Notion dark: #1c1c1c canvas, soft-white ink, low-contrast hairlines */
-  --background: 0 0% 11%;
-  --foreground: 0 0% 92%;
-  --border: 0 0% 20%;
+  /* Mandovi (dark): night-river slate, lifted teal. All pairs >= 4.5:1. */
+  --background: 200 20% 9%;
+  --foreground: 190 15% 92%;           /* 15.2:1 */
+  --border: 200 12% 20%;
 
-  --card: 0 0% 13%;
-  --card-foreground: 0 0% 92%;
-  --card-border: 0 0% 20%;
+  --card: 200 18% 12%;
+  --card-foreground: 190 15% 92%;
+  --card-border: 200 12% 20%;
 
-  --sidebar: 0 0% 9%;
-  --sidebar-foreground: 0 0% 76%;
-  --sidebar-border: 0 0% 18%;
-  --sidebar-primary: 0 0% 92%;
-  --sidebar-primary-foreground: 0 0% 12%;
-  --sidebar-accent: 0 0% 17%;
-  --sidebar-accent-foreground: 0 0% 92%;
-  --sidebar-ring: 212 78% 58%;
+  --sidebar: 200 22% 7%;
+  --sidebar-foreground: 190 12% 78%;
+  --sidebar-border: 200 12% 17%;
+  --sidebar-primary: 184 55% 55%;
+  --sidebar-primary-foreground: 200 30% 8%;
+  --sidebar-accent: 186 30% 18%;
+  --sidebar-accent-foreground: 186 50% 85%;
+  --sidebar-ring: 184 55% 55%;
 
-  --popover: 0 0% 14%;
-  --popover-foreground: 0 0% 92%;
-  --popover-border: 0 0% 20%;
+  --popover: 200 18% 12%;
+  --popover-foreground: 190 15% 92%;
+  --popover-border: 200 12% 20%;
 
-  --primary: 0 0% 92%;
-  --primary-foreground: 0 0% 12%;
+  --primary: 184 55% 55%;              /* 8.7:1 with its foreground */
+  --primary-foreground: 200 30% 8%;
 
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 92%;
+  --secondary: 200 15% 18%;
+  --secondary-foreground: 190 15% 92%;
 
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 200 15% 15%;
+  --muted-foreground: 190 10% 66%;     /* 7.8:1 */
 
-  --accent: 0 0% 18%;
-  --accent-foreground: 0 0% 92%;
+  --accent: 186 30% 18%;
+  --accent-foreground: 186 50% 85%;
 
-  --destructive: 2 60% 54%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive: 4 75% 66%;
+  --destructive-foreground: 200 30% 8%;
 
-  --input: 0 0% 24%;
-  --ring: 212 78% 58%;
+  --input: 200 10% 45%;                /* 3.9:1 */
+  --ring: 184 55% 55%;
 
-  --chart-1: 212 65% 60%;
-  --chart-2: 146 40% 52%;
-  --chart-3: 35 66% 58%;
-  --chart-4: 262 50% 66%;
-  --chart-5: 2 62% 62%;
+  --chart-1: 184 55% 55%;
+  --chart-2: 38 85% 60%;
+  --chart-3: 152 45% 52%;
+  --chart-4: 262 50% 70%;
+  --chart-5: 4 75% 66%;
 
-  --success: 146 42% 50%;
-  --success-foreground: 0 0% 100%;
-  --warning: 35 68% 55%;
-  --warning-foreground: 0 0% 8%;
-  --danger: 2 62% 58%;
-  --danger-foreground: 0 0% 100%;
-  --info: 212 78% 62%;
-  --info-foreground: 0 0% 8%;
+  --success: 152 45% 52%;
+  --success-foreground: 200 30% 8%;
+  --warning: 38 85% 60%;
+  --warning-foreground: 200 30% 8%;
+  --danger: 4 75% 66%;
+  --danger-foreground: 200 30% 8%;
+  --info: 210 80% 70%;
+  --info-foreground: 200 30% 8%;
 }
 
 @layer base {
@@ -228,10 +235,24 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    /* Used for hours at a stretch: generous line-height, no hairline-thin text. */
+    line-height: 1.55;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-sans font-semibold tracking-tight;
+    line-height: 1.25;
+  }
+
+  /* Timers, marks and scores line up digit-for-digit. */
+  .tabular-nums {
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Every focusable thing shows where keyboard focus is (WCAG 2.4.7). */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 

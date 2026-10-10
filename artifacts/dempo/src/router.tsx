@@ -4,6 +4,7 @@ import { useAuth, SignOutButton } from "@clerk/react";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { Loader2, MailQuestion } from "lucide-react";
 import { Shell } from "@/components/layout";
+import { BRAND } from "@/lib/brand";
 
 function NotInvited() {
   return (
@@ -13,7 +14,7 @@ function NotInvited() {
       </div>
       <h1 className="text-2xl font-serif font-bold text-foreground mb-2">You're not on the list yet</h1>
       <p className="text-muted-foreground max-w-md mb-8">
-        Dempo Learn is invite-only. Ask your professor or administrator to add your email, then sign in again with that address.
+        {BRAND.name} is invite-only. Ask your professor or administrator to add your email, then sign in again with that address.
       </p>
       <SignOutButton>
         <button className="px-4 py-2 rounded-md border font-medium text-muted-foreground hover:text-foreground">

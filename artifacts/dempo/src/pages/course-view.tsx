@@ -46,6 +46,7 @@ import { EditAssignmentDialog } from "@/components/edit-assignment-dialog";
 import { Pencil } from "lucide-react";
 import { CourseGroupsView } from "@/components/course-groups";
 import { useListCourseGroups, getListCourseGroupsQueryKey } from "@workspace/api-client-react";
+import { BRAND } from "@/lib/brand";
 
 export default function CourseViewPage({ id }: { id: string }) {
   const courseId = parseInt(id, 10);
@@ -1033,7 +1034,7 @@ function RosterView({ courseId }: { courseId: number }) {
           </CardContent>
         </Card>
         <p className="text-xs text-muted-foreground mt-3 px-1">
-          Students appear here once an admin has invited them to Dempo. Add them to your course directly — no code needed — or they can self-join with the invite code.
+          Students appear here once an admin has invited them to {BRAND.name}. Add them to your course directly — no code needed — or they can self-join with the invite code.
         </p>
       </div>
     </div>

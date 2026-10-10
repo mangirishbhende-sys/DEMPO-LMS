@@ -2,6 +2,7 @@ import { ClerkProvider, useAuth, SignIn, SignUp } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { BRAND } from "@/lib/brand";
 
 // REQUIRED — copy verbatim. Resolves the key from window.location.hostname so the
 // same build serves multiple Clerk custom domains.
@@ -36,11 +37,11 @@ export function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
       proxyUrl={clerkProxyUrl}
       appearance={{
         variables: {
-          // Notion-neutral: near-black actions, restrained blue links.
-          colorPrimary: 'hsl(40 8% 18%)',
+          // Mandovi: river-teal actions (matches --primary in index.css).
+          colorPrimary: 'hsl(186 75% 24%)',
           colorBackground: 'hsl(0 0% 100%)',
-          fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-          borderRadius: '0.5rem',
+          fontFamily: "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+          borderRadius: '0.375rem',
         },
         elements: {
           card: "shadow-sm border border-border",
@@ -55,14 +56,14 @@ export function ClerkAuthProvider({ children }: { children: React.ReactNode }) {
       localization={{
         signIn: {
           start: {
-            title: "Sign in to Dempo Learn",
+            title: `Sign in to ${BRAND.name}`,
             subtitle: "Welcome back! Please sign in to continue",
           },
         },
         signUp: {
           start: {
-            title: "Create your Dempo Learn account",
-            subtitle: "Join the fun — it's free",
+            title: `Create your ${BRAND.name} account`,
+            subtitle: "Use the email your college invited.",
           },
         },
       }}
